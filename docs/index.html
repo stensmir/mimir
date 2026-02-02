@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mimir — Voice-to-Text for macOS</title>
+<meta name="description" content="Mimir is a privacy-first voice-to-text dictation app for macOS. Powered by Parakeet ASR, runs 100% offline.">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #1a1a1a;
+  --bg2: #232323;
+  --green: #4ade80;
+  --green-dim: #22c55e;
+  --text: #ffffff;
+  --text2: #888888;
+  --border: #2d2d2d;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: var(--green); text-decoration: none; transition: opacity 0.2s; }
+a:hover { opacity: 0.8; }
+
+/* Animations */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.fade-up { animation: fadeUp 0.8s ease-out both; }
+.fade-up-d1 { animation-delay: 0.15s; }
+.fade-up-d2 { animation-delay: 0.3s; }
+.fade-up-d3 { animation-delay: 0.45s; }
+.fade-up-d4 { animation-delay: 0.6s; }
+
+/* Hero */
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: url('assets/hero-bg.jpg') center/cover no-repeat;
+  filter: brightness(0.25) saturate(0.7);
+  transform: scale(1.05);
+}
+
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(26,26,26,0.15) 0%, rgba(26,26,26,0.6) 60%, var(--bg) 100%);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  padding: 2rem;
+  max-width: 700px;
+}
+
+.hero-icon {
+  width: 160px;
+  height: 160px;
+  border-radius: 0;
+  margin-bottom: 2rem;
+  animation: float 4s ease-in-out infinite;
+  filter: drop-shadow(0 20px 40px rgba(74, 222, 128, 0.2));
+  background: none;
+}
+
+.hero h1 {
+  font-size: clamp(3rem, 8vw, 5.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, #fff 0%, #b0b0b0 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero .tagline {
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  color: var(--text2);
+  font-weight: 300;
+  margin-bottom: 2.5rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.9rem 2rem;
+  background: var(--green);
+  color: #000;
+  font-weight: 600;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s;
+  text-decoration: none;
+}
+.btn:hover { background: var(--green-dim); opacity: 1; transform: translateY(-2px); box-shadow: 0 8px 30px rgba(74, 222, 128, 0.25); }
+.btn svg { width: 20px; height: 20px; }
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.btn-outline:hover { border-color: var(--green); background: rgba(74, 222, 128, 0.05); }
+
+.scroll-hint {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--text2);
+  font-size: 0.8rem;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+/* Sections */
+section { padding: 2rem 2rem; }
+.container { max-width: 1100px; margin: 0 auto; }
+
+.section-label {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: var(--green);
+  margin-bottom: 0.75rem;
+}
+
+.section-title {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+
+.section-sub {
+  color: var(--text2);
+  font-size: 1.1rem;
+  max-width: 600px;
+  margin-bottom: 3.5rem;
+}
+
+/* Features */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.feature-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.feature-card:hover { border-color: var(--green-dim); transform: translateY(-4px); }
+
+.feature-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(74, 222, 128, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.25rem;
+  color: var(--green);
+}
+.feature-icon svg { width: 24px; height: 24px; }
+
+.feature-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
+.feature-card p { color: var(--text2); font-size: 0.95rem; line-height: 1.6; }
+
+/* How it works */
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 2rem;
+  text-align: center;
+}
+
+.step { position: relative; }
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(74, 222, 128, 0.1);
+  border: 2px solid var(--green);
+  color: var(--green);
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-bottom: 1.25rem;
+}
+
+.step h3 { font-size: 1.15rem; margin-bottom: 0.4rem; }
+.step p { color: var(--text2); font-size: 0.9rem; }
+
+.step-arrow {
+  display: none;
+  position: absolute;
+  top: 28px;
+  right: -1.25rem;
+  color: var(--border);
+  font-size: 1.5rem;
+}
+@media (min-width: 700px) { .step-arrow { display: block; } }
+
+/* About */
+.about-section { background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.about-content { max-width: 100%; }
+.about-content p { color: var(--text2); font-size: 1.05rem; margin-bottom: 1rem; line-height: 1.8; }
+.about-content strong { color: var(--text); }
+
+/* Download CTA */
+.cta-section { text-align: center; }
+.cta-section .section-sub { margin-left: auto; margin-right: auto; }
+
+.version-badge {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  background: rgba(74, 222, 128, 0.1);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: var(--green);
+  margin-bottom: 1.5rem;
+}
+
+.btn-disabled {
+  background: var(--bg-secondary) !important;
+  color: var(--text-muted) !important;
+  border: 1px solid var(--border) !important;
+  cursor: default !important;
+  opacity: 0.5;
+}
+.btn-disabled:hover { transform: none !important; box-shadow: none !important; }
+.footer-cta { font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 1rem; }
+.footer-feedback-btn { display: inline-flex; margin-bottom: 2rem; }
+.cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+/* Footer */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 3rem 2rem;
+  text-align: center;
+}
+
+.footer-links {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.footer-links a { color: var(--text2); font-size: 0.9rem; }
+.footer-links a:hover { color: var(--green); }
+
+.footer-copy { color: #555; font-size: 0.8rem; }
+
+/* Divider */
+.divider {
+  width: 48px;
+  height: 2px;
+  background: var(--green);
+  border-radius: 1px;
+  margin-bottom: 2rem;
+  opacity: 0.5;
+}
+
+/* Feature Hero (privacy two-column) */
+.feature-hero {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3rem;
+  margin-bottom: 1.5rem;
+}
+.feature-hero-text .feature-hero-heading {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 1rem;
+}
+.feature-hero-text .feature-hero-heading svg {
+  width: 32px; height: 32px; vertical-align: middle; margin-right: 0.5rem; color: var(--green);
+}
+.feature-hero-text p {
+  color: var(--text2);
+  font-size: 1.05rem;
+  line-height: 1.8;
+}
+.feature-hero-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  transform: perspective(1000px) rotateY(-5deg);
+  transition: transform 0.4s ease;
+}
+.feature-hero-image img:hover {
+  transform: perspective(1000px) rotateY(0deg);
+}
+.feature-hero.reverse .feature-hero-image { order: -1; }
+.feature-hero.reverse .feature-hero-image img {
+  transform: perspective(1000px) rotateY(5deg);
+}
+.feature-hero.reverse .feature-hero-image img:hover {
+  transform: perspective(1000px) rotateY(0deg);
+}
+
+@media (max-width: 768px) {
+  .feature-hero {
+    grid-template-columns: 1fr;
+    padding: 2rem;
+  }
+  .feature-hero-image { order: -1; }
+  .feature-hero-image img {
+    transform: perspective(1000px) rotateY(0deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  section { padding: 4rem 1.25rem; }
+  .hero-icon { width: 72px; height: 72px; }
+  .screenshot-slide img { max-height: 50vh; }
+  .ss-prev, .ss-next { width: 36px; height: 36px; font-size: 1.2rem; }
+}
+
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<!-- Language Switcher -->
+<div id="lang-switcher" style="position:fixed;top:1rem;right:1.5rem;z-index:1000;display:flex;gap:0.5rem;font-size:0.8rem;font-weight:500;font-family:Inter,sans-serif;">
+  <a href="#" data-lang="en" class="lang-btn" style="color:var(--green);padding:0.3rem 0.5rem;border-radius:6px;transition:color 0.2s;text-decoration:none;">EN</a>
+  <a href="#" data-lang="ru" class="lang-btn" style="color:var(--text2);padding:0.3rem 0.5rem;border-radius:6px;transition:color 0.2s;text-decoration:none;">RU</a>
+  <a href="#" data-lang="de" class="lang-btn" style="color:var(--text2);padding:0.3rem 0.5rem;border-radius:6px;transition:color 0.2s;text-decoration:none;">DE</a>
+  <a href="#" data-lang="fr" class="lang-btn" style="color:var(--text2);padding:0.3rem 0.5rem;border-radius:6px;transition:color 0.2s;text-decoration:none;">FR</a>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <img src="assets/logo-clean.png?v=5" alt="Mimir" class="hero-icon fade-up">
+    <h1 class="fade-up fade-up-d1">Mimir</h1>
+    <p class="tagline fade-up fade-up-d2" data-i18n="hero_tagline">Speak, friend, and enter.</p>
+    <a href="https://github.com/stensmir/mimir/releases/latest" class="btn fade-up fade-up-d3">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <span data-i18n="hero_cta">Download for macOS</span>
+    </a>
+  </div>
+  <div class="scroll-hint" data-i18n="scroll_hint">↓ Scroll to explore</div>
+</section>
+
+<!-- Features -->
+<section id="features">
+  <div class="container">
+    <div class="section-label" data-i18n="features_label">Features</div>
+    <h2 class="section-title" data-i18n="features_title">Built for focus.</h2>
+    <p class="section-sub" data-i18n="features_sub">No cloud. No subscriptions. No distractions.</p>
+    <!-- Privacy Hero Feature -->
+    <div class="feature-hero">
+      <div class="feature-hero-text">
+        <h3 class="feature-hero-heading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span data-i18n="f1_hero_title">Your voice stays yours.</span>
+        </h3>
+        <p data-i18n="f1_hero_desc"><strong style="color:#fff">Mimir</strong> runs offline, always. No cloud, no analytics, no tracking — nothing leaves your machine. The perfect companion for AI tools like <strong style="color:#fff">Claude Code</strong>, <strong style="color:#fff">ChatGPT</strong>, and beyond. Just speak to create.</p>
+      </div>
+      <div class="feature-hero-image">
+        <img src="assets/screenshot-home.png" alt="Mimir — dictation history" loading="lazy">
+      </div>
+    </div>
+
+    <!-- Engine feature — image left, text right (mirrored) -->
+    <div class="feature-hero reverse">
+      <div class="feature-hero-image">
+        <img src="assets/screenshot-models.png" alt="Mimir — speech recognition models" loading="lazy">
+      </div>
+      <div class="feature-hero-text">
+        <h3 class="feature-hero-heading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          <span data-i18n="f2_hero_title">Choose your engine.</span>
+        </h3>
+        <p data-i18n="f2_hero_desc">Two world-class speech recognition engines at your fingertips. <strong style='color:#fff'>NVIDIA Parakeet</strong> — state-of-the-art accuracy with automatic punctuation, supporting 25 languages. <strong style='color:#fff'>Whisper</strong> by <strong style='color:#fff'>OpenAI</strong> — the proven open-source standard. Both run locally, both are free. Pick the one you like best.</p>
+      </div>
+    </div>
+
+    <!-- Transcribe feature — text left, image right -->
+    <div class="feature-hero">
+      <div class="feature-hero-text">
+        <h3 class="feature-hero-heading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+          <span data-i18n="f3_hero_title">Transcribe anything.</span>
+        </h3>
+        <p data-i18n="f3_hero_desc">Meetings, interviews, voice memos — drop any audio or video file and get accurate text in seconds. WAV, MP3, FLAC, OGG — all supported natively. Stop wasting hours on manual transcription. Extract the key insights, analyze, and move on.</p>
+      </div>
+      <div class="feature-hero-image">
+        <img src="assets/screenshot-transcribe.png" alt="Mimir — batch transcription" loading="lazy">
+      </div>
+    </div>
+
+    <!-- MCP feature — image left, text right (mirrored) -->
+    <div class="feature-hero reverse">
+      <div class="feature-hero-image">
+        <img src="assets/screenshot-mcp.png" alt="Mimir — MCP integration" loading="lazy">
+      </div>
+      <div class="feature-hero-text">
+        <h3 class="feature-hero-heading">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m8.66-14.66l-4.24 4.24m-4.24 4.24L3.34 20.66M23 12h-6m-6 0H1m18.66 8.66l-4.24-4.24m-4.24-4.24L3.34 3.34"/></svg>
+          <span data-i18n="f4_hero_title">Integrate with your AI tools.</span>
+        </h3>
+        <p data-i18n="f4_hero_desc"><strong style='color:#fff'>Mimir</strong> provides a built-in <strong style='color:#fff'>MCP</strong> server — connect it to <strong style='color:#fff'>Claude Desktop</strong>, <strong style='color:#fff'>Cursor</strong>, or any MCP-compatible AI agent. Transcribe audio right from your AI conversations. Let your LLM manage voice-to-text on demand. One config, zero friction.</p>
+      </div>
+    </div>
+
+    <!-- Remaining feature cards (hidden) -->
+    <div class="features-grid" style="display:none;">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        </div>
+        <h3 data-i18n="f2_title">Parakeet ASR engine</h3>
+        <p data-i18n="f2_desc">Powered by NVIDIA's Parakeet — state-of-the-art speech recognition running locally on your hardware.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><command/><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
+        </div>
+        <h3 data-i18n="f3_title">Global hotkey</h3>
+        <p data-i18n="f3_desc">macOS native. Press your hotkey in any app, speak, and text appears right where your cursor is.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        </div>
+        <h3 data-i18n="f4_title">Smart dictation</h3>
+        <p data-i18n="f4_desc">Auto-punctuation and intelligent formatting. Speak naturally — Mimir handles the rest.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- About -->
+<section class="about-section" id="about">
+  <div class="container">
+    <div class="about-content">
+      <div class="section-label" data-i18n="about_label">Under the hood</div>
+      <h2 class="section-title" data-i18n="about_title">Built for speed. Designed for privacy.</h2>
+      <div class="divider"></div>
+      <p data-i18n="about_p1"><strong style='color:#fff'>Mimir</strong> is written in <strong style='color:#fff'>Rust</strong> — fast, lightweight, and resource-efficient. <strong style='color:#fff'>NVIDIA's Parakeet ASR</strong> model runs locally via ONNX Runtime, delivering near-instant transcription with automatic punctuation.</p>
+      <p data-i18n="about_p2">Configure a global hotkey or set up a <strong style='color:#fff'>wake word</strong> — just say "Start recording" and dictate hands-free, no keyboard needed. Optimized for Apple Silicon, with Windows and Linux on the roadmap.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Download CTA -->
+<section class="cta-section" id="download">
+  <div class="container">
+    <div class="section-label" data-i18n="cta_label">Get started</div>
+    <h2 class="section-title" data-i18n="cta_title">Ready to try Mimir?</h2>
+    <p class="section-sub" data-i18n="cta_sub">Free. Download and start dictating in seconds.</p>
+    <div class="cta-buttons">
+      <a href="https://github.com/stensmir/mimir/releases/latest" class="btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>
+        <span data-i18n="cta_download">Download for macOS</span>
+      </a>
+      <div class="btn btn-disabled">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        <span data-i18n="cta_windows">Windows — soon</span>
+      </div>
+      <div class="btn btn-disabled">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <span data-i18n="cta_linux">Linux — soon</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer>
+  <p class="footer-cta" data-i18n="footer_cta">Help us make the product better</p>
+  <a href="feedback.html" class="btn btn-outline footer-feedback-btn" data-i18n="footer_feedback">Leave Feedback</a>
+  <p class="footer-copy">© 2026 Mimir</p>
+  <p class="footer-copy" style="margin-top:0.5rem; font-size:0.7rem;">All trademarks are property of their respective owners.</p>
+</footer>
+
+<script>
+const i18n = {
+  en: {
+    hero_tagline: "Speak, friend, and enter.",
+    f1_hero_title: "Your voice stays yours.",
+    f1_hero_desc: "<strong style='color:#fff'>Mimir</strong> runs offline, always. No cloud, no analytics, no tracking — nothing leaves your machine. The perfect companion for AI tools like <strong style='color:#fff'>Claude Code</strong>, <strong style='color:#fff'>ChatGPT</strong>, and beyond. Just speak to create.",
+    hero_cta: "Download for macOS",
+    scroll_hint: "↓ Scroll to explore",
+    features_label: "Features",
+    features_title: "Built for focus.",
+    features_sub: "No cloud. No subscriptions. No distractions.",
+    f1_title: "Privacy-first",
+    f1_desc: "Runs 100% offline. Your audio never leaves your Mac — no servers, no cloud, no tracking.",
+    f2_hero_title: "Choose your engine.",
+    f2_hero_desc: "Two world-class speech recognition engines at your fingertips. <strong style='color:#fff'>NVIDIA Parakeet</strong> — state-of-the-art accuracy with automatic punctuation, supporting 25 languages. <strong style='color:#fff'>Whisper</strong> by <strong style='color:#fff'>OpenAI</strong> — the proven open-source standard. Both run locally, both are free. Pick the one you like best.",
+    f3_hero_title: "Transcribe anything.",
+    f4_hero_title: "Integrate with your AI tools.",
+    f4_hero_desc: "Mimir provides a built-in <strong style='color:#fff'>MCP</strong> server — connect it to <strong style='color:#fff'>Claude Desktop</strong>, <strong style='color:#fff'>Cursor</strong>, or any MCP-compatible AI agent. Transcribe audio right from your AI conversations. Let your LLM manage voice-to-text on demand. One config, zero friction.",
+    f3_hero_desc: "Meetings, interviews, voice memos — drop any audio or video file and get accurate text in seconds. WAV, MP3, FLAC, OGG — all supported natively. Stop wasting hours on manual transcription. Extract the key insights, analyze, and move on.",
+    f2_title: "Parakeet ASR engine",
+    f2_desc: "Powered by NVIDIA's Parakeet — state-of-the-art speech recognition running locally on your hardware.",
+    f3_title: "Global hotkey",
+    f3_desc: "macOS native. Press your hotkey in any app, speak, and text appears right where your cursor is.",
+    f4_title: "Smart dictation",
+    f4_desc: "Auto-punctuation and intelligent formatting. Speak naturally — Mimir handles the rest.",
+    how_label: "How it works",
+    how_title: "Three steps. Zero friction.",
+    how_sub: "From thought to text in seconds.",
+    s1_title: "Press hotkey",
+    s1_desc: "Hit your global shortcut from any app. Mimir starts listening.",
+    s2_title: "Speak",
+    s2_desc: "Talk naturally. Say what you mean, the way you'd say it.",
+    s3_title: "Text appears",
+    s3_desc: "Punctuated, formatted text is typed right where your cursor is.",
+    about_label: "Under the hood",
+    about_title: "Built for speed. Designed for privacy.",
+    about_p1: 'Mimir uses <strong style=\"color:#fff\">NVIDIA\'s Parakeet ASR</strong> — a production-grade automatic speech recognition model — running entirely on your Mac. No internet connection required. No audio data is ever sent anywhere.',
+    about_p2: 'The model runs natively on Apple Silicon via CoreML, delivering fast, accurate transcription with remarkably low resource usage. It\'s the same quality you\'d expect from cloud APIs, without the privacy trade-off.',
+    about_p3: 'Built with <strong style=\"color:#fff\">Tauri</strong> and <strong style=\"color:#fff\">Rust</strong> for a tiny footprint and native macOS integration. Mimir lives in your menu bar, ready when you are.',
+    cta_label: "Get started",
+    cta_title: "Ready to try Mimir?",
+    cta_sub: "Free. Download and start dictating in seconds.",
+    cta_badge: "macOS · Apple Silicon",
+    cta_download: "Download for macOS",
+    cta_windows: "Windows — soon",
+    cta_linux: "Linux — soon",
+    footer_cta: "Help us make the product better",
+    footer_feedback: "Leave Feedback",
+    footer_copy: "© 2026 Mimir. Built with care for macOS."
+  },
+  ru: {
+    hero_tagline: "Скажи «друг» и входи.",
+    f1_hero_title: "Ваш голос остаётся вашим.",
+    f1_hero_desc: "<strong style='color:#fff'>Mimir</strong> работает офлайн — всегда. Без облака, без аналитики, без отслеживания — ничто не покидает ваш компьютер. Идеальный спутник для AI-инструментов — <strong style='color:#fff'>Claude Code</strong>, <strong style='color:#fff'>ChatGPT</strong> и других. Просто говорите, чтобы создавать.",
+    hero_cta: "Скачать для macOS",
+    scroll_hint: "↓ Листайте дальше",
+    features_label: "Возможности",
+    features_title: "Создан для продуктивности.",
+    features_sub: "Без облака. Без подписок. Без лишнего.",
+    f1_title: "Конфиденциальность",
+    f1_desc: "Работает полностью офлайн. Ваш звук никогда не покидает Mac — ни серверов, ни облака, ни слежки.",
+    f2_hero_title: "Выбирайте движок.",
+    f2_hero_desc: "Два лучших движка распознавания речи. <strong style='color:#fff'>NVIDIA Parakeet</strong> — высочайшая точность с автоматической пунктуацией, поддержка 25 языков. <strong style='color:#fff'>Whisper</strong> от <strong style='color:#fff'>OpenAI</strong> — проверенный открытый стандарт. Оба работают локально, оба бесплатны. Выбирайте тот, что понравится.",
+    f3_hero_title: "Транскрибируйте что угодно.",
+    f4_hero_title: "Интегрируйте с вашими AI-инструментами.",
+    f4_hero_desc: "Mimir предоставляет встроенный <strong style='color:#fff'>MCP</strong>-сервер — подключите его к <strong style='color:#fff'>Claude Desktop</strong>, <strong style='color:#fff'>Cursor</strong> или любому MCP-совместимому AI-агенту. Транскрибируйте аудио прямо из AI-диалогов. Пусть ваш LLM управляет голосом в текст по запросу. Одна настройка, никаких сложностей.",
+    f3_hero_desc: "Совещания, интервью, голосовые заметки — перетащите любой аудио- или видеофайл и получите точный текст за секунды. WAV, MP3, FLAC, OGG — всё поддерживается нативно. Хватит тратить часы на ручную расшифровку. Извлекайте главное, анализируйте и двигайтесь дальше.",
+    f2_title: "Движок Parakeet ASR",
+    f2_desc: "На базе NVIDIA Parakeet — передовое распознавание речи, работающее локально на вашем устройстве.",
+    f3_title: "Глобальная горячая клавиша",
+    f3_desc: "Нативная интеграция с macOS. Нажмите горячую клавишу в любом приложении, говорите — текст появится там, где стоит курсор.",
+    f4_title: "Умная диктовка",
+    f4_desc: "Автоматическая пунктуация и форматирование. Говорите естественно — Mimir позаботится об остальном.",
+    how_label: "Как это работает",
+    how_title: "Три шага. Никаких сложностей.",
+    how_sub: "От мысли к тексту за секунды.",
+    s1_title: "Нажмите клавишу",
+    s1_desc: "Используйте горячую клавишу из любого приложения. Mimir начнёт слушать.",
+    s2_title: "Говорите",
+    s2_desc: "Говорите свободно. Так, как вы привыкли.",
+    s3_title: "Текст готов",
+    s3_desc: "Отформатированный текст с пунктуацией вводится прямо там, где стоит курсор.",
+    about_label: "Под капотом",
+    about_title: "Создан для скорости. Спроектирован для приватности.",
+    about_p1: 'Mimir использует <strong style=\"color:#fff\">NVIDIA Parakeet ASR</strong> — модель распознавания речи промышленного уровня, работающую целиком на вашем Mac. Интернет не нужен. Аудиоданные никуда не отправляются.',
+    about_p2: 'Модель работает нативно на Apple Silicon через CoreML, обеспечивая быструю и точную транскрипцию при минимальном потреблении ресурсов. Качество на уровне облачных сервисов — без компромиссов в приватности.',
+    about_p3: 'Построен на <strong style=\"color:#fff\">Tauri</strong> и <strong style=\"color:#fff\">Rust</strong> — минимальный размер и нативная интеграция с macOS. Mimir живёт в строке меню и всегда готов к работе.',
+    cta_label: "Начните сейчас",
+    cta_title: "Готовы попробовать Mimir?",
+    cta_sub: "Бесплатно. Скачайте и начните диктовать за секунды.",
+    cta_badge: "macOS · Apple Silicon",
+    cta_download: "Скачать для macOS",
+    cta_windows: "Windows — скоро",
+    cta_linux: "Linux — скоро",
+    cta_github: "Открыть на GitHub",
+    footer_cta: "Помогите сделать продукт лучше",
+    footer_feedback: "Оставить отзыв",
+    footer_copy: "© 2026 Mimir. Создан с заботой для macOS."
+  },
+  de: {
+    hero_tagline: "Sprich, Freund, und tritt ein.",
+    f1_hero_title: "Ihre Stimme bleibt Ihre.",
+    f1_hero_desc: "<strong style='color:#fff'>Mimir</strong> läuft offline — immer. Keine Cloud, keine Analysen, kein Tracking — nichts verlässt Ihren Rechner. Der perfekte Begleiter für KI-Tools wie <strong style='color:#fff'>Claude Code</strong>, <strong style='color:#fff'>ChatGPT</strong> und mehr. Einfach sprechen, um zu erschaffen.",
+    hero_cta: "Für macOS laden",
+    scroll_hint: "↓ Weiter scrollen",
+    features_label: "Funktionen",
+    features_title: "Gebaut für Fokus.",
+    features_sub: "Keine Cloud. Kein Abo. Keine Ablenkung.",
+    f1_title: "Privatsphäre zuerst",
+    f1_desc: "Läuft 100 % offline. Ihre Audiodaten verlassen niemals Ihren Mac — keine Server, keine Cloud, kein Tracking.",
+    f2_hero_title: "Wählen Sie Ihre Engine.",
+    f2_hero_desc: "Zwei erstklassige Spracherkennungs-Engines. <strong style='color:#fff'>NVIDIA Parakeet</strong> — höchste Genauigkeit mit automatischer Zeichensetzung, 25 Sprachen. <strong style='color:#fff'>Whisper</strong> von <strong style='color:#fff'>OpenAI</strong> — der bewährte Open-Source-Standard. Beide laufen lokal, beide sind kostenlos. Wählen Sie die, die Ihnen am besten gefällt.",
+    f3_hero_title: "Transkribieren Sie alles.",
+    f4_hero_title: "Integrieren Sie Ihre KI-Tools.",
+    f4_hero_desc: "Mimir bietet einen integrierten <strong style='color:#fff'>MCP</strong>-Server — verbinden Sie ihn mit <strong style='color:#fff'>Claude Desktop</strong>, <strong style='color:#fff'>Cursor</strong> oder jedem MCP-kompatiblen KI-Agenten. Transkribieren Sie Audio direkt aus Ihren KI-Gesprächen. Lassen Sie Ihr LLM die Sprache-zu-Text-Funktion bei Bedarf steuern. Eine Einstellung, kein Aufwand.",
+    f3_hero_desc: "Meetings, Interviews, Sprachnotizen — ziehen Sie eine Audio- oder Videodatei hinein und erhalten Sie in Sekunden präzisen Text. WAV, MP3, FLAC, OGG — alles nativ unterstützt. Verschwenden Sie keine Stunden mit manueller Transkription. Extrahieren Sie die wichtigsten Erkenntnisse, analysieren Sie und machen Sie weiter.",
+    f2_title: "Parakeet ASR-Engine",
+    f2_desc: "Angetrieben von NVIDIAs Parakeet — modernste Spracherkennung, die lokal auf Ihrer Hardware läuft.",
+    f3_title: "Globaler Hotkey",
+    f3_desc: "macOS-nativ. Drücken Sie Ihren Hotkey in jeder App, sprechen Sie, und der Text erscheint an der Cursorposition.",
+    f4_title: "Intelligentes Diktieren",
+    f4_desc: "Automatische Zeichensetzung und Formatierung. Sprechen Sie natürlich — Mimir erledigt den Rest.",
+    how_label: "So funktioniert's",
+    how_title: "Drei Schritte. Null Aufwand.",
+    how_sub: "Vom Gedanken zum Text in Sekunden.",
+    s1_title: "Hotkey drücken",
+    s1_desc: "Nutzen Sie Ihr globales Tastenkürzel aus jeder App. Mimir hört zu.",
+    s2_title: "Sprechen",
+    s2_desc: "Sprechen Sie natürlich. Sagen Sie es so, wie Sie es meinen.",
+    s3_title: "Text erscheint",
+    s3_desc: "Formatierter Text mit Zeichensetzung wird direkt an der Cursorposition eingefügt.",
+    about_label: "Unter der Haube",
+    about_title: "Für Geschwindigkeit gebaut. Für Privatsphäre entwickelt.",
+    about_p1: 'Mimir nutzt <strong style=\"color:#fff\">NVIDIAs Parakeet ASR</strong> — ein professionelles Spracherkennungsmodell, das vollständig auf Ihrem Mac läuft. Keine Internetverbindung nötig. Keine Audiodaten werden jemals gesendet.',
+    about_p2: 'Das Modell läuft nativ auf Apple Silicon via CoreML und liefert schnelle, präzise Transkription bei bemerkenswert geringem Ressourcenverbrauch. Dieselbe Qualität wie Cloud-APIs — ohne Kompromisse bei der Privatsphäre.',
+    about_p3: 'Entwickelt mit <strong style=\"color:#fff\">Tauri</strong> und <strong style=\"color:#fff\">Rust</strong> für minimalen Speicherbedarf und native macOS-Integration. Mimir lebt in Ihrer Menüleiste — immer bereit.',
+    cta_label: "Loslegen",
+    cta_title: "Bereit, Mimir auszuprobieren?",
+    cta_sub: "Kostenlos. Herunterladen und in Sekunden diktieren.",
+    cta_badge: "macOS · Apple Silicon",
+    cta_download: "Neueste Version laden",
+    footer_cta: "Help us make the product better",
+    footer_feedback: "Leave Feedback",
+    footer_copy: "© 2026 Mimir. Mit Sorgfalt für macOS entwickelt."
+  },
+  fr: {
+    hero_tagline: "Parlez, ami, et entrez.",
+    f1_hero_title: "Votre voix reste la vôtre.",
+    f1_hero_desc: "<strong style='color:#fff'>Mimir</strong> fonctionne hors ligne — toujours. Pas de cloud, pas d'analytique, pas de suivi — rien ne quitte votre machine. Le compagnon idéal pour les outils IA comme <strong style='color:#fff'>Claude Code</strong>, <strong style='color:#fff'>ChatGPT</strong> et bien d'autres. Parlez simplement pour créer.",
+    hero_cta: "Télécharger pour macOS",
+    scroll_hint: "↓ Défiler pour explorer",
+    features_label: "Fonctionnalités",
+    features_title: "Conçu pour la concentration.",
+    features_sub: "Pas de cloud. Pas d'abonnement. Pas de distraction.",
+    f1_title: "Confidentialité d'abord",
+    f1_desc: "Fonctionne 100 % hors ligne. Votre audio ne quitte jamais votre Mac — pas de serveurs, pas de cloud, pas de pistage.",
+    f2_hero_title: "Choisissez votre moteur.",
+    f2_hero_desc: "Deux moteurs de reconnaissance vocale de classe mondiale. <strong style='color:#fff'>NVIDIA Parakeet</strong> — précision maximale avec ponctuation automatique, 25 langues. <strong style='color:#fff'>Whisper</strong> par <strong style='color:#fff'>OpenAI</strong> — le standard open source éprouvé. Les deux fonctionnent localement, les deux sont gratuits. Choisissez celui qui vous plaît.",
+    f3_hero_title: "Transcrivez n'importe quoi.",
+    f4_hero_title: "Intégrez vos outils IA.",
+    f4_hero_desc: "Mimir fournit un serveur <strong style='color:#fff'>MCP</strong> intégré — connectez-le à <strong style='color:#fff'>Claude Desktop</strong>, <strong style='color:#fff'>Cursor</strong> ou tout agent IA compatible MCP. Transcrivez l'audio directement depuis vos conversations IA. Laissez votre LLM gérer la voix en texte à la demande. Une seule configuration, zéro friction.",
+    f3_hero_desc: "Réunions, entretiens, mémos vocaux — déposez n'importe quel fichier audio ou vidéo et obtenez un texte précis en quelques secondes. WAV, MP3, FLAC, OGG — tout est pris en charge nativement. Arrêtez de perdre des heures en transcription manuelle. Extrayez l'essentiel, analysez et avancez.",
+    f2_title: "Moteur Parakeet ASR",
+    f2_desc: "Propulsé par Parakeet de NVIDIA — reconnaissance vocale de pointe fonctionnant localement sur votre matériel.",
+    f3_title: "Raccourci global",
+    f3_desc: "Natif macOS. Appuyez sur votre raccourci dans n'importe quelle app, parlez, et le texte apparaît là où se trouve votre curseur.",
+    f4_title: "Dictée intelligente",
+    f4_desc: "Ponctuation automatique et mise en forme intelligente. Parlez naturellement — Mimir s'occupe du reste.",
+    how_label: "Comment ça marche",
+    how_title: "Trois étapes. Zéro friction.",
+    how_sub: "De la pensée au texte en quelques secondes.",
+    s1_title: "Appuyez sur le raccourci",
+    s1_desc: "Utilisez votre raccourci global depuis n'importe quelle app. Mimir commence à écouter.",
+    s2_title: "Parlez",
+    s2_desc: "Parlez naturellement. Dites ce que vous pensez, comme vous le diriez.",
+    s3_title: "Le texte apparaît",
+    s3_desc: "Un texte ponctué et formaté est saisi directement là où se trouve votre curseur.",
+    about_label: "Sous le capot",
+    about_title: "Conçu pour la vitesse. Pensé pour la confidentialité.",
+    about_p1: 'Mimir utilise <strong style=\"color:#fff\">Parakeet ASR de NVIDIA</strong> — un modèle de reconnaissance vocale de qualité professionnelle fonctionnant entièrement sur votre Mac. Pas de connexion internet requise. Aucune donnée audio n\'est jamais envoyée.',
+    about_p2: 'Le modèle tourne nativement sur Apple Silicon via CoreML, offrant une transcription rapide et précise avec une consommation de ressources remarquablement faible. La même qualité que les API cloud, sans compromis sur la vie privée.',
+    about_p3: 'Construit avec <strong style=\"color:#fff\">Tauri</strong> et <strong style=\"color:#fff\">Rust</strong> pour une empreinte minimale et une intégration native macOS. Mimir vit dans votre barre de menus, prêt quand vous l\'êtes.',
+    cta_label: "Commencer",
+    cta_title: "Prêt à essayer Mimir ?",
+    cta_sub: "Gratuit. Téléchargez et commencez à dicter en quelques secondes.",
+    cta_badge: "macOS · Apple Silicon",
+    cta_download: "Télécharger pour macOS",
+    cta_windows: "Windows — bientôt",
+    cta_linux: "Linux — bientôt",
+    footer_feedback: "Contact",
+    footer_copy: "© 2026 Mimir. Conçu avec soin pour macOS."
+  }
+};
+
+function setLang(lang) {
+  if (!i18n[lang]) return;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (i18n[lang][key]) el.innerHTML = i18n[lang][key];
+  });
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.style.color = btn.getAttribute('data-lang') === lang ? 'var(--green)' : 'var(--text2)';
+  });
+  document.documentElement.lang = lang === 'ru' ? 'ru' : lang === 'de' ? 'de' : lang === 'fr' ? 'fr' : 'en';
+  localStorage.setItem('mimir-lang', lang);
+}
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', e => { e.preventDefault(); setLang(btn.getAttribute('data-lang')); });
+});
+
+const saved = localStorage.getItem('mimir-lang');
+if (saved && i18n[saved]) setLang(saved);
+</script>
+<script>
+// Screenshots carousel removed — screenshot shown inline in features
+</script>
+</body>
+</html>

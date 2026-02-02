@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedback — Mimir</title>
+<meta name="description" content="Send feedback, report bugs, or request features for Mimir.">
+<link rel="icon" href="assets/icon.png" type="image/png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #1a1a1a;
+  --bg2: #232323;
+  --green: #4ade80;
+  --green-dim: #22c55e;
+  --text: #ffffff;
+  --text2: #888888;
+  --border: #2d2d2d;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+a { color: var(--green); text-decoration: none; transition: opacity 0.2s; }
+a:hover { opacity: 0.8; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-up { animation: fadeUp 0.8s ease-out both; }
+.fade-up-d1 { animation-delay: 0.15s; }
+.fade-up-d2 { animation-delay: 0.3s; }
+
+/* Background */
+.page-bg {
+  position: fixed;
+  inset: 0;
+  background: url('assets/hero-bg.jpg') center/cover no-repeat;
+  filter: brightness(0.15) saturate(0.5);
+  z-index: 0;
+}
+
+.page-overlay {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(26,26,26,0.4) 0%, rgba(26,26,26,0.85) 100%);
+  z-index: 0;
+}
+
+/* Layout */
+.page-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem 1.5rem 4rem;
+}
+
+/* Nav */
+.back-link {
+  align-self: flex-start;
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto 2rem;
+  font-size: 0.9rem;
+  color: var(--text2);
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--green); opacity: 1; }
+
+/* Card */
+.feedback-card {
+  width: 100%;
+  max-width: 600px;
+  background: rgba(35, 35, 35, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 2.5rem;
+}
+
+.feedback-card h1 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.4rem;
+}
+
+.feedback-card .subtitle {
+  color: var(--text2);
+  font-size: 0.95rem;
+  margin-bottom: 2rem;
+}
+
+/* Form */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text2);
+  margin-bottom: 0.4rem;
+}
+
+.form-group label .optional {
+  font-weight: 400;
+  color: #555;
+  font-size: 0.8rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(26, 26, 26, 0.8);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: var(--green);
+}
+
+.form-group select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+.form-group select option {
+  background: var(--bg2);
+  color: var(--text);
+}
+
+.form-group textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* Drop zone */
+.drop-zone {
+  border: 2px dashed var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s;
+  position: relative;
+}
+
+.drop-zone:hover,
+.drop-zone.dragover {
+  border-color: var(--green);
+  background: rgba(74, 222, 128, 0.04);
+}
+
+.drop-zone-icon {
+  color: var(--text2);
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.drop-zone-text {
+  color: var(--text2);
+  font-size: 0.85rem;
+}
+
+.drop-zone-text span {
+  color: var(--green);
+  font-weight: 500;
+}
+
+.drop-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.file-name {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--green);
+  display: none;
+}
+
+/* Submit */
+.submit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.85rem 2rem;
+  background: var(--green);
+  color: #000;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: inherit;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.25s;
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.submit-btn:hover {
+  background: var(--green-dim);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(74, 222, 128, 0.25);
+}
+
+.submit-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* States */
+.form-status {
+  display: none;
+  text-align: center;
+  padding: 2rem 0;
+}
+
+.form-status.visible { display: block; }
+
+.form-status .status-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.form-status h2 {
+  font-size: 1.3rem;
+  margin-bottom: 0.5rem;
+}
+
+.form-status p {
+  color: var(--text2);
+  font-size: 0.95rem;
+}
+
+.form-status .retry-btn {
+  margin-top: 1.25rem;
+  display: inline-block;
+  padding: 0.6rem 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: transparent;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.form-status .retry-btn:hover {
+  border-color: var(--green);
+}
+
+/* Lang switcher */
+#lang-switcher {
+  position: fixed;
+  top: 1rem;
+  right: 1.5rem;
+  z-index: 1000;
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.lang-btn {
+  padding: 0.3rem 0.5rem;
+  border-radius: 6px;
+  transition: color 0.2s;
+  text-decoration: none;
+}
+
+@media (max-width: 600px) {
+  .feedback-card { padding: 1.5rem; border-radius: 16px; }
+  .page-content { padding: 1.25rem 1rem 3rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-bg"></div>
+<div class="page-overlay"></div>
+
+<div id="lang-switcher">
+  <a href="#" data-lang="en" class="lang-btn" style="color:var(--green);">EN</a>
+  <a href="#" data-lang="ru" class="lang-btn" style="color:var(--text2);">RU</a>
+  <a href="#" data-lang="de" class="lang-btn" style="color:var(--text2);">DE</a>
+  <a href="#" data-lang="fr" class="lang-btn" style="color:var(--text2);">FR</a>
+</div>
+
+<div class="page-content">
+  <a href="index.html" class="back-link fade-up">← <span data-i18n="back">Back to Mimir</span></a>
+
+  <div class="feedback-card fade-up fade-up-d1">
+    <h1 data-i18n="title">Feedback</h1>
+    <p class="subtitle" data-i18n="subtitle">Help us make Mimir better. Send bug reports and feature requests.</p>
+
+    <form id="feedback-form" action="https://formspree.io/f/xplaceholder" method="POST" enctype="multipart/form-data">
+      <div class="form-group">
+        <label><span data-i18n="label_name">Name</span> <span class="optional" data-i18n="optional">(optional)</span></label>
+        <input type="text" name="name" data-i18n-placeholder="ph_name" placeholder="Your name">
+      </div>
+
+      <div class="form-group">
+        <label><span data-i18n="label_email">Email</span> <span class="optional" data-i18n="optional">(optional)</span></label>
+        <input type="email" name="email" data-i18n-placeholder="ph_email" placeholder="your@email.com">
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="label_category">Category</label>
+        <select name="category" id="category-select">
+          <option value="bug" data-i18n="cat_bug">Bug Report</option>
+          <option value="feature" data-i18n="cat_feature">Feature Request</option>
+          <option value="general" data-i18n="cat_general" selected>General Feedback</option>
+          <option value="other" data-i18n="cat_other">Other</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label data-i18n="label_message">Message <span style="color:var(--green);">*</span></label>
+        <textarea name="message" required data-i18n-placeholder="ph_message" placeholder="Tell us what's on your mind..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label><span data-i18n="label_screenshot">Screenshot</span> <span class="optional" data-i18n="optional">(optional)</span></label>
+        <div class="drop-zone" id="drop-zone">
+          <div class="drop-zone-icon">📎</div>
+          <div class="drop-zone-text" data-i18n="drop_text"><span>Click to upload</span> or drag & drop an image</div>
+          <input type="file" name="screenshot" accept="image/*">
+        </div>
+        <div class="file-name" id="file-name"></div>
+      </div>
+
+      <button type="submit" class="submit-btn" data-i18n="submit">Send Feedback</button>
+    </form>
+
+    <div class="form-status" id="status-success">
+      <div class="status-icon">✅</div>
+      <h2 data-i18n="success_title">Thank you!</h2>
+      <p data-i18n="success_text">Your feedback has been sent. We appreciate it.</p>
+    </div>
+
+    <div class="form-status" id="status-error">
+      <div class="status-icon">⚠️</div>
+      <h2 data-i18n="error_title">Something went wrong</h2>
+      <p data-i18n="error_text">Please try again or email us directly.</p>
+      <button class="retry-btn" data-i18n="retry" onclick="resetForm()">Try again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Drop zone
+const dropZone = document.getElementById('drop-zone');
+const fileInput = dropZone.querySelector('input[type="file"]');
+const fileName = document.getElementById('file-name');
+
+['dragenter', 'dragover'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.add('dragover'); }));
+['dragleave', 'drop'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.remove('dragover'); }));
+
+dropZone.addEventListener('drop', e => {
+  const files = e.dataTransfer.files;
+  if (files.length && files[0].type.startsWith('image/')) {
+    fileInput.files = files;
+    showFileName(files[0].name);
+  }
+});
+
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) showFileName(fileInput.files[0].name);
+});
+
+function showFileName(name) {
+  fileName.textContent = '📎 ' + name;
+  fileName.style.display = 'block';
+}
+
+// Form submit
+const form = document.getElementById('feedback-form');
+const successEl = document.getElementById('status-success');
+const errorEl = document.getElementById('status-error');
+
+form.addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = form.querySelector('.submit-btn');
+  btn.disabled = true;
+  btn.textContent = '...';
+
+  try {
+    const data = new FormData(form);
+    const res = await fetch(form.action, { method: 'POST', body: data, headers: { 'Accept': 'application/json' } });
+    if (res.ok) {
+      form.style.display = 'none';
+      successEl.classList.add('visible');
+    } else {
+      throw new Error();
+    }
+  } catch {
+    form.style.display = 'none';
+    errorEl.classList.add('visible');
+  }
+});
+
+function resetForm() {
+  form.reset();
+  fileName.style.display = 'none';
+  form.style.display = '';
+  form.querySelector('.submit-btn').disabled = false;
+  form.querySelector('.submit-btn').textContent = i18n[currentLang]?.submit || 'Send Feedback';
+  successEl.classList.remove('visible');
+  errorEl.classList.remove('visible');
+}
+
+// i18n
+let currentLang = 'en';
+const i18n = {
+  en: {
+    back: "Back to Mimir", title: "Feedback", subtitle: "Help us make Mimir better. Send bug reports and feature requests.",
+    label_name: "Name", label_email: "Email", label_category: "Category", label_message: "Message", label_screenshot: "Screenshot",
+    optional: "(optional)", ph_name: "Your name", ph_email: "your@email.com", ph_message: "Tell us what's on your mind...",
+    cat_bug: "Bug Report", cat_feature: "Feature Request", cat_general: "General Feedback", cat_other: "Other",
+    drop_text: "<span>Click to upload</span> or drag & drop an image",
+    submit: "Send Feedback",
+    success_title: "Thank you!", success_text: "Your feedback has been sent. We appreciate it.",
+    error_title: "Something went wrong", error_text: "Please try again or email us directly.", retry: "Try again"
+  },
+  ru: {
+    back: "Назад к Mimir", title: "Обратная связь", subtitle: "Помогите сделать Mimir лучше. Отправляйте баг-репорты и запросы на фичи.",
+    label_name: "Имя", label_email: "Email", label_category: "Категория", label_message: "Сообщение", label_screenshot: "Скриншот",
+    optional: "(необязательно)", ph_name: "Ваше имя", ph_email: "ваш@email.com", ph_message: "Расскажите, что у вас на уме...",
+    cat_bug: "Баг-репорт", cat_feature: "Запрос функции", cat_general: "Общий отзыв", cat_other: "Другое",
+    drop_text: "<span>Нажмите для загрузки</span> или перетащите изображение",
+    submit: "Отправить",
+    success_title: "Спасибо!", success_text: "Ваш отзыв отправлен. Мы ценим это.",
+    error_title: "Что-то пошло не так", error_text: "Попробуйте ещё раз или напишите нам напрямую.", retry: "Попробовать снова"
+  },
+  de: {
+    back: "Zurück zu Mimir", title: "Feedback", subtitle: "Helfen Sie uns, Mimir besser zu machen. Senden Sie Fehlerberichte und Feature-Wünsche.",
+    label_name: "Name", label_email: "E-Mail", label_category: "Kategorie", label_message: "Nachricht", label_screenshot: "Screenshot",
+    optional: "(optional)", ph_name: "Ihr Name", ph_email: "ihre@email.com", ph_message: "Erzählen Sie uns, was Sie denken...",
+    cat_bug: "Fehlerbericht", cat_feature: "Feature-Wunsch", cat_general: "Allgemeines Feedback", cat_other: "Sonstiges",
+    drop_text: "<span>Klicken zum Hochladen</span> oder Bild hierher ziehen",
+    submit: "Feedback senden",
+    success_title: "Vielen Dank!", success_text: "Ihr Feedback wurde gesendet. Wir schätzen es.",
+    error_title: "Etwas ist schiefgelaufen", error_text: "Bitte versuchen Sie es erneut oder schreiben Sie uns direkt.", retry: "Erneut versuchen"
+  },
+  fr: {
+    back: "Retour à Mimir", title: "Contact", subtitle: "Aidez-nous à améliorer Mimir. Envoyez vos rapports de bugs et demandes de fonctionnalités.",
+    label_name: "Nom", label_email: "E-mail", label_category: "Catégorie", label_message: "Message", label_screenshot: "Capture d'écran",
+    optional: "(facultatif)", ph_name: "Votre nom", ph_email: "votre@email.com", ph_message: "Dites-nous ce que vous avez en tête...",
+    cat_bug: "Rapport de bug", cat_feature: "Demande de fonctionnalité", cat_general: "Commentaire général", cat_other: "Autre",
+    drop_text: "<span>Cliquer pour envoyer</span> ou glisser-déposer une image",
+    submit: "Envoyer",
+    success_title: "Merci !", success_text: "Votre message a été envoyé. Nous l'apprécions.",
+    error_title: "Un problème est survenu", error_text: "Veuillez réessayer ou nous contacter directement.", retry: "Réessayer"
+  }
+};
+
+function setLang(lang) {
+  if (!i18n[lang]) return;
+  currentLang = lang;
+  const t = i18n[lang];
+
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key] !== undefined) el.innerHTML = t[key];
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (t[key] !== undefined) el.placeholder = t[key];
+  });
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.style.color = btn.getAttribute('data-lang') === lang ? 'var(--green)' : 'var(--text2)';
+  });
+
+  document.documentElement.lang = lang;
+  localStorage.setItem('mimir-lang', lang);
+}
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', e => { e.preventDefault(); setLang(btn.getAttribute('data-lang')); });
+});
+
+const saved = localStorage.getItem('mimir-lang');
+if (saved && i18n[saved]) setLang(saved);
+</script>
+</body>
+</html>
