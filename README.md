@@ -103,9 +103,9 @@ Found a bug? Have a feature request? **[Leave feedback](https://stensmir.github.
 
 <a href="https://star-history.com/#stensmir/mimir&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=stensmir/mimir&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=stensmir/mimir&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=stensmir/mimir&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=stensmir/mimir&type=Date&theme=dark&v=20260203" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=stensmir/mimir&type=Date&v=20260203" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=stensmir/mimir&type=Date&theme=dark&v=20260203" />
  </picture>
 </a>
 
