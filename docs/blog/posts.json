@@ -1,5 +1,13 @@
 [
   {
+    "slug": "claude-code-opus46",
+    "title": "Claude Code 2.1.32–2.1.34: Agent Teams, Memory, and Opus 4.6",
+    "titleRu": "Claude Code 2.1.32–2.1.34: Команды агентов, память и Opus 4.6",
+    "date": "2026-02-07",
+    "description": "Agent Teams for parallel workflows, persistent Memory across sessions, and Claude Opus 4.6 with 1M token context. A practical guide.",
+    "descriptionRu": "Agent Teams для параллельной работы, персистентная память между сессиями и Claude Opus 4.6 с контекстом в 1M токенов. Практический гайд."
+  },
+  {
     "slug": "v034-ai-features",
     "title": "Mimir 0.3.5: AI-Powered Transcriptions",
     "titleRu": "Mimir 0.3.5: ИИ приходит в транскрипции",
