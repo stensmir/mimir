@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mimir 0.3.5: AI-Powered Transcriptions — Mimir Blog</title>
+<meta name="description" content="AI text improvement, translation, custom prompts, and batch history. Mimir gets smarter.">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../assets/apple-touch-icon.png">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg: #1a1a1a;
+  --bg2: #232323;
+  --green: #4ade80;
+  --green-dim: #22c55e;
+  --text: #ffffff;
+  --text2: #888888;
+  --border: #2d2d2d;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a { color: var(--green); text-decoration: none; transition: opacity 0.2s; }
+a:hover { opacity: 0.8; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up { animation: fadeUp 0.8s ease-out both; }
+.fade-up-d1 { animation-delay: 0.15s; }
+.fade-up-d2 { animation-delay: 0.3s; }
+
+/* Header */
+.header {
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.header-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--text);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.header-logo img { width: 32px; height: 32px; }
+.header-nav { display: flex; gap: 2rem; align-items: center; }
+.header-nav a {
+  color: var(--text2);
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.header-nav a:hover { color: var(--green); opacity: 1; }
+
+/* Lang switcher */
+.lang-switch {
+  display: flex;
+  gap: 0.25rem;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 2px;
+}
+.lang-switch button {
+  background: none;
+  border: none;
+  color: var(--text2);
+  font-size: 0.8rem;
+  font-family: inherit;
+  font-weight: 500;
+  padding: 0.3rem 0.6rem;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.lang-switch button.active {
+  background: var(--green);
+  color: #000;
+}
+
+/* Article */
+.article {
+  flex: 1;
+  padding: 4rem 2rem;
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: var(--text2);
+  margin-bottom: 2rem;
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--green); opacity: 1; }
+.back-link svg { width: 16px; height: 16px; }
+
+.article-meta { font-size: 0.85rem; color: var(--text2); margin-bottom: 1rem; }
+
+.article-title {
+  font-size: clamp(2rem, 5vw, 2.8rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.article-intro {
+  font-size: 1.15rem;
+  color: var(--text2);
+  margin-bottom: 2.5rem;
+  line-height: 1.8;
+}
+
+/* Content */
+.content h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 3rem 0 1rem;
+  color: var(--text);
+}
+.content h2:first-child { margin-top: 0; }
+.content p {
+  color: var(--text2);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin-bottom: 1.25rem;
+}
+.content strong { color: var(--text); }
+.content ul, .content ol {
+  color: var(--text2);
+  font-size: 1.05rem;
+  line-height: 1.8;
+  margin-bottom: 1.25rem;
+  padding-left: 1.5rem;
+}
+.content li { margin-bottom: 0.5rem; }
+
+/* Feature Section */
+.feature-section {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 2rem 0;
+}
+.feature-section h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+.feature-icon {
+  width: 40px;
+  height: 40px;
+  background: rgba(74, 222, 128, 0.1);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--green);
+  flex-shrink: 0;
+}
+.feature-icon svg { width: 20px; height: 20px; }
+.feature-section p {
+  color: var(--text2);
+  font-size: 1rem;
+  line-height: 1.7;
+  margin-bottom: 0;
+}
+.feature-section p + p { margin-top: 1rem; }
+
+/* Screenshots */
+.screenshot {
+  margin: 1.5rem 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.screenshot img {
+  width: 100%;
+  display: block;
+}
+.screenshot-caption {
+  font-size: 0.85rem;
+  color: var(--text2);
+  text-align: center;
+  padding: 0.75rem;
+  background: var(--bg2);
+}
+
+/* Divider */
+.divider {
+  width: 48px;
+  height: 2px;
+  background: var(--green);
+  border-radius: 1px;
+  margin: 3rem 0;
+  opacity: 0.5;
+}
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2rem;
+  text-align: center;
+}
+.footer-copy { color: #555; font-size: 0.8rem; }
+
+/* i18n */
+[data-lang="ru"] { display: none; }
+body.lang-ru [data-lang="en"] { display: none; }
+body.lang-ru [data-lang="ru"] { display: block; }
+
+@media (max-width: 600px) {
+  .header { flex-direction: column; gap: 1rem; text-align: center; }
+  .article { padding: 2rem 1.25rem; }
+  .feature-section { padding: 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a href="../../" class="header-logo">
+    <img src="../../assets/logo-clean.png?v=5" alt="Mimir">
+    <span>Mimir</span>
+  </a>
+  <nav class="header-nav">
+    <div class="lang-switch">
+      <button class="active" onclick="setLang('en')">EN</button>
+      <button onclick="setLang('ru')">RU</button>
+    </div>
+    <a href="../">Blog</a>
+    <a href="../../#features">Features</a>
+    <a href="../../#download">Download</a>
+  </nav>
+</header>
+
+<article class="article">
+  <a href="../" class="back-link fade-up">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+    <span data-lang="en">Back to Blog</span>
+    <span data-lang="ru">Назад к блогу</span>
+  </a>
+
+  <div class="article-meta fade-up fade-up-d1">February 7, 2026</div>
+
+  <div data-lang="en">
+    <h1 class="article-title fade-up fade-up-d1">Mimir 0.3.5: AI Comes to Your Transcriptions</h1>
+    <p class="article-intro fade-up fade-up-d2">
+      Speech-to-text is great, but raw transcriptions can be rough. Filler words, weird punctuation, run-on sentences. Today we're shipping a release that's all about making that output actually usable — with AI.
+    </p>
+  </div>
+  <div data-lang="ru">
+    <h1 class="article-title fade-up fade-up-d1">Mimir 0.3.5: ИИ приходит в транскрипции</h1>
+    <p class="article-intro fade-up fade-up-d2">
+      Распознавание речи — это здорово, но сырые транскрипции далеки от идеала. Слова-паразиты, странная пунктуация, бесконечные предложения. Этот релиз — про то, как сделать результат по-настоящему полезным с помощью ИИ.
+    </p>
+  </div>
+
+  <div class="content fade-up fade-up-d2">
+
+    <!-- AI Text Improvement -->
+    <div class="feature-section">
+      <h3>
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
+          </svg>
+        </span>
+        <span data-lang="en">AI Text Improvement</span>
+        <span data-lang="ru">ИИ-улучшение текста</span>
+      </h3>
+      <div data-lang="en">
+        <p>Send any transcription through an LLM to clean it up. We support <strong>Claude CLI</strong>, <strong>Ollama</strong> (local), and <strong>LM Studio</strong>. One button press — and filler words disappear, grammar gets fixed, and the text actually reads well.</p>
+        <p>Pick Ollama or LM Studio and the text never leaves your machine. Use Claude when you need that extra quality. Your choice, your data.</p>
+      </div>
+      <div data-lang="ru">
+        <p>Отправьте любую транскрипцию через LLM для очистки. Поддерживаем <strong>Claude CLI</strong>, <strong>Ollama</strong> (локально) и <strong>LM Studio</strong>. Одна кнопка — и слова-паразиты исчезают, грамматика исправляется, текст читается нормально.</p>
+        <p>Выберите Ollama или LM Studio — текст не покинет вашу машину. Claude — когда нужно максимальное качество. Ваш выбор, ваши данные.</p>
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/history-ai.png" alt="AI-improved transcription in history">
+      <div class="screenshot-caption" data-lang="en">Transcription history with AI improvement and translation buttons</div>
+      <div class="screenshot-caption" data-lang="ru">История транскрипций с кнопками ИИ-улучшения и перевода</div>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/improved-badge.png" alt="Improved text badge">
+      <div class="screenshot-caption" data-lang="en">The "Improved" badge shows the text has been processed by AI</div>
+      <div class="screenshot-caption" data-lang="ru">Бейдж «Improved» показывает, что текст обработан ИИ</div>
+    </div>
+
+    <!-- AI Settings -->
+    <div class="feature-section">
+      <h3>
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15 1.65 1.65 0 0 0 3.09 14H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6 1.65 1.65 0 0 0 10 3.09V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+        </span>
+        <span data-lang="en">AI Settings Page</span>
+        <span data-lang="ru">Страница настроек ИИ</span>
+      </h3>
+      <div data-lang="en">
+        <p>A dedicated <strong>AI tab</strong> where you configure everything: pick your provider, set the model, customize the system prompt. Tell the AI exactly what you want — "clean up for a blog post", "format as meeting notes", "keep it casual".</p>
+        <p>Timeout configuration included — some files take a while, especially with local models.</p>
+      </div>
+      <div data-lang="ru">
+        <p>Отдельная вкладка <strong>AI</strong> для полной настройки: выбор провайдера, модели, кастомный системный промпт. Скажите ИИ, что именно вам нужно — «очисти для блога», «оформи как заметки со встречи», «оставь разговорный стиль».</p>
+        <p>Настройка таймаута — для длинных файлов и локальных моделей.</p>
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/ai-settings.png" alt="AI Settings — provider selection">
+      <div class="screenshot-caption" data-lang="en">AI Settings: choose provider, model, and endpoint</div>
+      <div class="screenshot-caption" data-lang="ru">Настройки ИИ: выбор провайдера, модели и эндпоинта</div>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/ai-custom-prompt.png" alt="AI Settings — custom prompt">
+      <div class="screenshot-caption" data-lang="en">Fully customizable improvement prompt</div>
+      <div class="screenshot-caption" data-lang="ru">Полностью настраиваемый промпт для улучшения</div>
+    </div>
+
+    <!-- Translation -->
+    <div class="feature-section">
+      <h3>
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+          </svg>
+        </span>
+        <span data-lang="en">Translate to English</span>
+        <span data-lang="ru">Перевод на английский</span>
+      </h3>
+      <div data-lang="en">
+        <p>One click — and your transcription is translated to English. Translations are <strong>cached</strong>, so repeated requests are instant. Switch between original and translated text anytime.</p>
+      </div>
+      <div data-lang="ru">
+        <p>Один клик — и транскрипция переведена на английский. Переводы <strong>кешируются</strong>, повторные запросы мгновенны. Переключайтесь между оригиналом и переводом в любое время.</p>
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/history-translation.png" alt="Translation in action">
+      <div class="screenshot-caption" data-lang="en">Inline English translation with caching</div>
+      <div class="screenshot-caption" data-lang="ru">Встроенный перевод на английский с кешированием</div>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/translation.png" alt="Translation detail">
+      <div class="screenshot-caption" data-lang="en">Translation appears right below the original text</div>
+      <div class="screenshot-caption" data-lang="ru">Перевод отображается прямо под оригиналом</div>
+    </div>
+
+    <!-- Dictionary -->
+    <div class="feature-section">
+      <h3>
+        <span class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+        </span>
+        <span data-lang="en">Smart Dictionary</span>
+        <span data-lang="ru">Умный словарь</span>
+      </h3>
+      <div data-lang="en">
+        <p>Teach Mimir your vocabulary. Add corrections for commonly misheard words and technical terms — the dictionary applies fixes automatically during transcription. Hot-reload included: changes take effect without restarting the app.</p>
+      </div>
+      <div data-lang="ru">
+        <p>Научите Mimir вашей лексике. Добавляйте исправления для часто неверно распознаваемых слов и технических терминов — словарь применяет правки автоматически. Горячая перезагрузка: изменения вступают в силу без перезапуска.</p>
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/dictionary.png" alt="Dictionary page">
+      <div class="screenshot-caption" data-lang="en">Custom dictionary with correction rules</div>
+      <div class="screenshot-caption" data-lang="ru">Пользовательский словарь с правилами исправлений</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Other improvements -->
+    <div data-lang="en">
+      <h2>Other Improvements</h2>
+      <ul>
+        <li><strong>Check for Updates</strong> — new button in About page and tray menu to manually check for updates</li>
+        <li><strong>Security hardening</strong> — CSP headers, input validation, comprehensive security review</li>
+        <li><strong>Codebase refactoring</strong> — modularized UI and Rust code for faster development</li>
+        <li><strong>Performance</strong> — faster builds, optimized runtime</li>
+        <li><strong>Bug fixes</strong> — UI glitches, edge cases in transcription, and more</li>
+      </ul>
+    </div>
+    <div data-lang="ru">
+      <h2>Другие улучшения</h2>
+      <ul>
+        <li><strong>Проверка обновлений</strong> — новая кнопка на странице About и в трее</li>
+        <li><strong>Безопасность</strong> — CSP-заголовки, валидация ввода, комплексный аудит</li>
+        <li><strong>Рефакторинг</strong> — модуляризация UI и Rust-кода</li>
+        <li><strong>Производительность</strong> — быстрые сборки, оптимизация</li>
+        <li><strong>Исправления</strong> — UI-баги, краевые случаи в транскрипции</li>
+      </ul>
+    </div>
+
+    <div class="screenshot">
+      <img src="images/about.png" alt="About page with Check for Updates">
+      <div class="screenshot-caption" data-lang="en">About page with "Check for Updates" button</div>
+      <div class="screenshot-caption" data-lang="ru">Страница About с кнопкой «Проверить обновления»</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div data-lang="en">
+      <h2>What's Next</h2>
+      <p><strong>Windows support</strong> is on the roadmap.</p>
+      <p>We're continuing to stabilize the client and preparing for <strong>open source</strong>. Stay tuned.</p>
+
+      <div class="divider"></div>
+
+      <h2>Get It Now</h2>
+      <p>Mimir 0.3.5 is available today. <a href="../../#download">Download the latest release</a> and let your transcriptions finally read like something you'd actually want to share.</p>
+    </div>
+    <div data-lang="ru">
+      <h2>Что дальше</h2>
+      <p><strong>Поддержка Windows</strong> — в планах.</p>
+      <p>Продолжаем работу над стабилизацией клиента и готовимся к <strong>open source</strong>. Следите за обновлениями.</p>
+
+      <div class="divider"></div>
+
+      <h2>Скачать</h2>
+      <p>Mimir 0.3.5 доступен прямо сейчас. <a href="../../#download">Скачайте последний релиз</a> — пусть ваши транскрипции наконец-то выглядят как нормальный текст.</p>
+    </div>
+
+  </div>
+</article>
+
+<footer>
+  <p class="footer-copy">© 2026 Mimir</p>
+</footer>
+
+<script>
+function setLang(lang) {
+  document.body.className = lang === 'ru' ? 'lang-ru' : '';
+  document.querySelectorAll('.lang-switch button').forEach(b => {
+    b.classList.toggle('active', b.textContent.trim() === lang.toUpperCase());
+  });
+  localStorage.setItem('mimir-blog-lang', lang);
+}
+// Restore saved preference
+const saved = localStorage.getItem('mimir-blog-lang');
+if (saved) setLang(saved);
+</script>
+
+</body>
+</html>
